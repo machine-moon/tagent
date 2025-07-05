@@ -24,10 +24,14 @@ RUN groupadd -g $AGENT_GID agent && \
     useradd -m -u $AGENT_UID -g $AGENT_GID -s /bin/bash agent && \
     chown -R agent:agent /home/agent
 
-# Configure npm
-ENV NPM_CONFIG_PREFIX=/home/agent/npm \
-    NODE_ENV=production \
-    PATH="${PATH}:/home/agent/npm/bin"
+# Configure environment
+ARG NPM_CONFIG_PREFIX=/home/agent/npm
+ARG NODE_ENV=production
+ARG TZ=America/Toronto
+ENV NPM_CONFIG_PREFIX=$NPM_CONFIG_PREFIX \
+    NODE_ENV=$NODE_ENV \
+    TZ=$TZ \
+    PATH="${PATH}:$NPM_CONFIG_PREFIX/bin"
 
 # Install npm packages in a single layer
 RUN npm install -g \
@@ -42,7 +46,7 @@ EXPOSE 34117 8080 433 80
 
 USER agent
 
-WORKDIR /home/agent/workspace
-
 # Custom script to source a script which (for me) loads a library of custom bash functions, see tsuite repository.
-CMD ["bash", "-c", "echo 'source $HOME/workspace/agents.sh' >> $HOME/.bashrc && exec tail -f /dev/null"]
+RUN bash -c "echo 'source $HOME/workspace/agents.sh' >> $HOME/.bashrc"
+
+WORKDIR /home/agent/workspace

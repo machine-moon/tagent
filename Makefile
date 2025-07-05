@@ -1,4 +1,4 @@
-.PHONY: build serve remove enter
+.PHONY: build serve clean enter
 
 all: build serve enter
 
@@ -8,7 +8,7 @@ build:
 serve:
 	@docker compose up -d
 
-remove:
+clean:
 	@docker compose down -v
 
 enter:
