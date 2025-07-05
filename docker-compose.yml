@@ -1,44 +1,23 @@
 services:
   agent:
     build: .
-    container_name: gemini-agent
-    environment:
-      - NODE_ENV=production
+    container_name: agent
+    image: t-agent:latest
+    restart: unless-stopped
     volumes:
-      # Mount your workspace directory (READ/WRITE)
-      - /home/dreamland/workspace:/home/agent/workspace
-      
-      # Mount system binaries (READ-ONLY for security)
-      - /usr/bin:/usr/bin:ro
-      - /bin:/bin:ro
-      
-      # Mount MCP services directory (PERSISTENT)
-      - mcp-services:/home/agent/mcp-services
-            
-      # Optional: Mount SSH keys for git operations
-      - /home/dreamland/.ssh:/home/agent/.ssh:ro
-
-      # Optional: Mount a specific directory for testing suites (READ-ONLY)
-      - /home/tsuite:/home/agent/tsuite:ro
-    ports:
-      - "34117:34117"  # Expose Gemini CLI port
-
+      - /home/$USER/workspace:/home/agent/workspace
+      - home:/home/agent
     stdin_open: true
     tty: true
-    
-    #security_opt:
-    #  - no-new-privileges:true
-    
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
-          memory: 5G
+          memory: 6G
           cpus: '2.0'
-    
     network_mode: "bridge"
-    
-    restart: unless-stopped
 
 volumes:
-  mcp-services:
+  home:
     driver: local

@@ -1,62 +1,48 @@
-FROM fedora:latest
+FROM fedora:42
 
-# Install Node.js and system dependencies
-RUN dnf update -y \
-    && dnf install -y \
-        nodejs \
-        npm \
-        htop \
-        git \
-        vim \
-        nano \
-        python3 \
-        python3-pip \
-        gcc \
-        gcc-c++ \
-        make \
-        libluv \
-        lua-lpeg \
-        wget \
+# Install system dependencies in a single layer
+RUN dnf update -y && dnf install -y \
+    nodejs \
+    npm \
+    git \
+    vim \
+    htop \
+    python3 \
+    python3-pip \
+    gcc \
+    gcc-c++ \
+    make \
+    wget \
     && dnf group install -y development-tools c-development \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
-# Create a dedicated user for the agent
-RUN useradd -m -s /bin/bash agent
+# Create user, this allows the container to run with the same permissions as your host user.
+ARG AGENT_UID=1000
+ARG AGENT_GID=1000
+RUN groupadd -g $AGENT_GID agent && \
+    useradd -m -u $AGENT_UID -g $AGENT_GID -s /bin/bash agent && \
+    chown -R agent:agent /home/agent
 
-# Set working directory
-WORKDIR /home/agent
+# Configure npm
+ENV NPM_CONFIG_PREFIX=/home/agent/npm \
+    NODE_ENV=production \
+    PATH="${PATH}:/home/agent/npm/bin"
 
-
-# Set environment variables
-ENV NODE_ENV=production
-ENV NPM_CONFIG_PREFIX=/home/agent/mcp-services
-ENV PATH="${PATH}:/home/agent/mcp-services/bin"
-
-
-# Install Gemini CLI globally
-RUN npm install -g @google/gemini-cli
-
-# Create directories for MCP services and workspace
-RUN mkdir -p /home/agent/mcp-services /home/agent/workspace
-
-# Install selected MCP servers globally
+# Install npm packages in a single layer
 RUN npm install -g \
+    @google/gemini-cli \
+    opencode-ai \
     @modelcontextprotocol/server-memory \
     @modelcontextprotocol/server-filesystem \
-    @upstash/context7-mcp 
+    @upstash/context7-mcp
 
-# Install the Gemini CLI
-RUN chown -R agent:agent /home/agent
 
-# Switch to the agent user
+EXPOSE 34117 8080 433 80  
+
 USER agent
 
-# Expose any ports if needed (adjust as necessary)
-EXPOSE 34117
-EXPOSE 8080
-EXPOSE 433
-EXPOSE 80
+WORKDIR /home/agent/workspace
 
-# Set the default command
-# CMD ["gemini"]
+# Custom script to source a script which (for me) loads a library of custom bash functions, see tsuite repository.
+CMD ["bash", "-c", "echo 'source $HOME/workspace/agents.sh' >> $HOME/.bashrc && exec tail -f /dev/null"]

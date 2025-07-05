@@ -1,18 +1,15 @@
-# Simple Makefile for Gemini Agent
+.PHONY: build serve remove enter
 
-.PHONY: build serve start enter remove
+all: build serve enter
 
 build:
-	docker compose build
+	@docker compose build
 
 serve:
-	docker compose up -d
-
-start:
-	tdocker gemini-agent gemini --show_memory_usage
-
-enter:
-	tdocker gemini-agent gemini bash
+	@docker compose up -d
 
 remove:
-	docker compose down
+	@docker compose down -v
+
+enter:
+	@docker exec -it agent bash
