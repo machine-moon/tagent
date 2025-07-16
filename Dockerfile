@@ -7,6 +7,7 @@ RUN dnf update -y && dnf install -y \
     git \
     vim \
     htop \
+    cmake \
     python3 \
     python3-pip \
     gcc \
@@ -40,9 +41,6 @@ RUN npm install -g \
     @modelcontextprotocol/server-memory \
     @modelcontextprotocol/server-filesystem \
     @upstash/context7-mcp
-
-
-EXPOSE 34117 8080 433 80  
 
 USER agent
 

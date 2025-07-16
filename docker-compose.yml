@@ -4,6 +4,10 @@ services:
     container_name: agent
     image: t-agent:latest
     restart: unless-stopped
+    # google auth uses random ports for callbacks, so we need to expose them
+    ports:
+      - "34117:34117"
+      - "44081:44081"
     volumes:
       - /home/$USER/workspace:/home/agent/workspace
       - home:/home/agent

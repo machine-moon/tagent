@@ -86,6 +86,35 @@ make enter   # Enter container shell
 make remove  # Stop and remove container with volumes
 ```
 
+## Deployment
+
+You can deploy T-Agent using either **Docker Compose** or a simple **docker run** command.
+
+### Docker Compose
+
+Start the container:
+
+```bash
+docker compose up -d
+```
+
+Stop the container and remove resources:
+
+```bash
+docker compose down -v
+```
+
+
+### Docker Run
+
+Alternatively, run the container directly:
+
+```bash
+docker run 
+```
+
+Replace `your-dockerhub-username/t-agent:latest` with your actual image name if needed.
+
 ## Architecture
 
 - **Base**: Fedora 42
